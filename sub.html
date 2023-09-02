@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- Added lang attribute -->
+<head>
+    <meta charset="utf-8"> <!-- Added charset meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        /* Additional styling for the Instamojo button */
+        .instamojo-button {
+            margin-top: 30px;
+            background-color: #5300eb;
+            color: #fff;
+            width: 180px;
+            border-radius: 30px;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+</head>
+<body>
+    <h1>Select Stark Membership</h1>
+    <div id="pricingTable"></div>
+
+    <script>
+        const pricingTableId = "prctbl_1NlBj1SIFt4DImytSQTHYhyh";
+        const publishableKey = "pk_live_51NlBJKSIFt4DImytgCSiBNcvssY7VkTr3L19ABEvwqqpiGOzi1JAkZ4Jvp5atW60ldADlubOOmuVfK0BxRV0Xc0E00Xzz41tHK";
+
+        // Function to render the Stripe pricing table
+        function renderPricingTable() {
+            const pricingTable = document.getElementById("pricingTable");
+
+            const stripePricingTable = document.createElement("stripe-pricing-table");
+            stripePricingTable.setAttribute("pricing-table-id", pricingTableId);
+            stripePricingTable.setAttribute("publishable-key", publishableKey);
+
+            pricingTable.appendChild(stripePricingTable);
+
+            // Listen for the checkout.session.completed event
+            document.addEventListener('checkout.session.completed', function(event) {
+                // Redirect the user to signin.html after payment
+                window.location.href = 'signin.html';
+            });
+        }
+
+        // Load the Stripe pricing table
+        document.addEventListener("DOMContentLoaded", function () {
+            renderPricingTable();
+        });
+    </script>
+</body>
+</html>

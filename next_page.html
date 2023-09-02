@@ -133,7 +133,7 @@
 
         <div class="welcome-message" id="welcomeMessage">
             <div class="daily-bugle-container" id="dailyBugleContainer">
-                <h3>Headlines upload</h3>
+                <h3>Daily Bugle News 24/7</h3>
                 <div class="date-time" id="currentDateTime"></div>
             </div>
 
@@ -145,7 +145,7 @@
         </div>
 
         <div class="headline-box">
-            <h2>Daily Bugle News 24/7</h2>
+            <h2>News Headlines</h2>
             <div class="headline-input">
                 <textarea id="headlineInput" placeholder="Enter headline here" style="width: 100%; height: 135px;"></textarea>
             </div>
@@ -158,6 +158,7 @@
 
     <script>
         const headlinesData = [];
+        reporterName = "";
 
         function addHeadline() {
             const headlineInput = document.getElementById("headlineInput");
@@ -183,8 +184,155 @@
                 });
             }
         }
+        
 
-        // Rest of the JavaScript code...
+function saveHeadlinesToCSV() {
+    const reporterNameInput = document.getElementById("reporterNameInput");
+    reporterName = reporterNameInput.value.trim();
+
+    if (!reporterName) {
+        alert("Please enter a reporter name.");
+        return;
+    }
+
+    let csvContent = "Headline\n";
+    headlinesData.forEach(entry => {
+        csvContent += `"${entry.headline}"\n`;
+    });
+
+    // Make an AJAX request to save the CSV content to the file
+    fetch('/save_csv', {
+        method: 'POST',
+        body: JSON.stringify({ csvContent, reporterName }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.message);
+    })
+    .catch(error => {
+        console.error('Error saving CSV:', error);
+    });
+
+    // Clear the headlinesData array after saving
+    headlinesData.length = 0;
+    headlineInput.value = "";
+    reporterNameInput.value = "";
+
+    // Optional: Show a message indicating successful save
+    const successMessage = document.createElement('div');
+    successMessage.textContent = 'CSV file saved successfully.';
+    document.body.appendChild(successMessage);
+}
+        
+
+        function showReporterNameInput() {
+            function showReporterNameInput() {
+                const headlineBox = document.querySelector(".headline-box");
+                const reporterNameBox = document.getElementById("reporterNameBox");
+                const createButton = document.querySelector(".create-button");
+                const nextButton = document.querySelector(".next-button");
+        
+                reporterNameBox.style.display = "block";
+                createButton.style.display = "none";
+                nextButton.style.display = "none";
+        
+                const reporterNameInput = document.getElementById("reporterNameInput");
+                reporterNameInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter") {
+                        saveHeadlinesToCSV();
+                    }
+                });
+            }
+        }
+
+        function saveHeadlinesToCSV() {
+            const reporterNameInput = document.getElementById("reporterNameInput");
+            reporterName = reporterNameInput.value.trim();
+        
+            if (!reporterName) {
+                alert("Please enter a reporter name.");
+                return;
+            }
+        
+            let csvContent = "Headline\n";
+            headlinesData.forEach(entry => {
+                csvContent += `"${entry.headline}"\n`;
+            });
+        
+            // Make an AJAX request to save the CSV content to the file
+            fetch('/save_csv', {
+                method: 'POST',
+                body: JSON.stringify({ csvContent, reporterName }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+        
+                // Construct the URL of the saved CSV file
+                const csvFileURL = '/templates/news_frade.csv';
+        
+                // Display the link to the saved CSV file
+                const linkContainer = document.createElement('div');
+                const csvLink = document.createElement('a');
+                csvLink.href = csvFileURL;
+                csvLink.textContent = 'Download CSV File';
+                linkContainer.appendChild(csvLink);
+        
+                const reporterNameBox = document.getElementById("reporterNameBox");
+                reporterNameBox.appendChild(linkContainer);
+            })
+            .catch(error => {
+                console.error('Error saving CSV:', error);
+            });
+        }
+        
+
+        let logoutVisible = false;
+
+        function toggleDateTime() {
+            const welcomeMessage = document.getElementById("welcomeMessage");
+            const dailyBugleContainer = document.getElementById("dailyBugleContainer");
+            const logoutContainer = document.getElementById("logout");
+    
+            logoutVisible = !logoutVisible;
+    
+            if (logoutVisible) {
+                logoutContainer.style.display = "block"; // Show the logout button
+            } else {
+                logoutContainer.style.display = "none"; // Hide the logout button
+            }
+        }
+    
+        
+
+        function updateCurrentDateTime() {
+            const currentDateTimeElement = document.getElementById("currentDateTime");
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' };
+            currentDateTimeElement.textContent = now.toLocaleDateString('en-US', options);
+    
+            setTimeout(updateCurrentDateTime, 1000);
+        }
+        function downloadCSV() {
+            const reporterNameInput = document.getElementById("reporterNameInput");
+            reporterName = reporterNameInput.value.trim();
+        
+            if (!reporterName) {
+                alert("Please enter a reporter name.");
+                return;
+            }
+        
+            // Make a GET request to generate and download the CSV file
+            const url = `/download_csv?headline=${encodeURIComponent(JSON.stringify(headlinesData.map(entry => entry.headline)))}`;
+            window.location.href = url;
+        }
+        
+
+        function goToLogin() {
+            window.location.href = "login.html";
+        }
     </script>
 </body>
 </html>

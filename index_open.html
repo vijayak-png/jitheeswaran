@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake News Detection System</title>
+    <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: rgba(0, 128, 0, 0.3); 
+            margin: 0;
+            padding: 0;
+            font-family: 'Open Sans Condensed', sans-serif;
+        }
+        
+        .login {
+            text-align: center;
+            padding: 5em;
+        }
+        
+        input[type=text], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 3px solid #ccc;
+            border-radius: 1px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        h1 {
+            text-align: center;
+            font-family: 'Pacifico', cursive;
+        }
+        
+        p {
+            text-align: center;
+        }
+        
+        .results {
+            margin-top: 20px;
+        }
+        
+        .results h2 {
+            font-family: 'Arimo', sans-serif;
+            font-size: 24px;
+        }
+        
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        
+        .report {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .report h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .report label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .report textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        #reportMessage {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+    </style>
+</head>
+<body>
+<div class="login">
+    <h1>Fake News Detector</h1>
+    <p>EDITH("Even dead I'm the hero") Predict</p>
+    <form id="predictionForm" action="/predict" method="post">
+        <!-- Existing headline input -->
+        <input type="text" id="headlineInput" name="title" required="required" style="font-size: 18pt">
+        <br>
+        <button type="button" onclick="predictFakeNews()">Predict</button>
+        <div class="results">
+            <h2 id="predictionResult"></h2>
+        </div>
+    </form>
+    
+    <!-- Report section -->
+    <div class="report" id="reportForm" style="display: none;">
+        <h2>Report Fake News</h2>
+        <form id="reportFormInner">
+            <label for="website">Website:</label>
+            <input type="text" id="websiteInput" name="website" required>
+            <br>
+            <label for="fake_news">DESCRIPTION OF THE NEWS:</label>
+            <textarea id="fakeNewsInput" name="fake_news" required></textarea>
+            <br>
+            <button type="button" onclick="submitReportForm()">Report</button>
+            
+        </form>
+    </div>
+</div>
+
+<script>
+    function predictFakeNews() {
+        const headlineInput = document.getElementById("headlineInput").value;
+
+        // Send the user input to the server for prediction
+        fetch('/predict', {
+            method: 'POST',
+            body: JSON.stringify({ title: headlineInput }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const predictionResult = document.getElementById("predictionResult");
+            predictionResult.textContent = `Looking ${data.prediction === "FAKE" ? "Spam ⚠️" : "Real"} News 📰`;
+
+            // Show or hide the report form based on the prediction
+            const reportForm = document.getElementById("reportForm");
+            if (data.show_report_form) {
+                reportForm.style.display = "block";
+            } else {
+                reportForm.style.display = "none";
+            }
+        })
+        .catch(error => {
+            console.error('Error predicting news:', error);
+            const predictionResult = document.getElementById("predictionResult");
+            predictionResult.textContent = 'Error predicting news';
+        });
+    }
+
+    function submitReportForm() {
+        const websiteInput = document.getElementById("websiteInput").value;
+        const fakeNewsInput = document.getElementById("fakeNewsInput").value;
+
+        // Send the report data to the server
+        fetch('/report', {
+            method: 'POST',
+            body: JSON.stringify({ website: websiteInput, fake_news: fakeNewsInput }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const reportMessage = document.getElementById("reportMessage");
+            reportMessage.textContent = data.message;
+        })
+        .catch(error => {
+            console.error('Error submitting report:', error);
+            const reportMessage = document.getElementById("reportMessage");
+            reportMessage.textContent = 'Error submitting report';
+        });
+    }
+</script>
+</body>
+</html>
